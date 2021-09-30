@@ -2,10 +2,19 @@ package dataconnectors
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/spiceai/data-components-contrib/dataconnectors/dapr"
 	"github.com/spiceai/data-components-contrib/dataconnectors/file"
 	"github.com/spiceai/data-components-contrib/dataconnectors/influxdb"
+
+	dapr_logger "github.com/dapr/kit/logger"
+)
+
+var (
+	// TODO: Replace with Spice AI daprComponentLogger
+	daprComponentLogger dapr_logger.Logger = dapr_logger.NewLogger("dapr-data-connectors-logger")
 )
 
 type DataConnector interface {
@@ -14,6 +23,10 @@ type DataConnector interface {
 }
 
 func NewDataConnector(name string) (DataConnector, error) {
+	if strings.HasPrefix(name, "dapr/") {
+		return dapr.NewDaprInputBindingConnector(name, daprComponentLogger)
+	}
+	
 	switch name {
 	case file.FileConnectorName:
 		return file.NewFileConnector(), nil
